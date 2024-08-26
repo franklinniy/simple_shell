@@ -6,66 +6,89 @@
 #include <sys/wait.h>
 #include "shell.h"
 /**
- * main - shell loop
+ * @brief Changes the current working directory.
  *
- * Description: reads input from the uset
+ * This function changes the current working directory to the path provided.
+ * If no path is provided, it changes to the user's home directory.
  *
- * Return: the result is always 0 to show success
-*/
+ * @param path The directory to change to. If NULL, changes to the home
+ */
 
-#define MAX_INPUT_SIZE 1024
-#define MAX_TOKENS 64
+void change_directory(char *path)
+{
+	if (path == NULL)
+	{
+		path = getenv("HOME");
+	}
+	if (chdir(path) != 0)
+	{
+		perror("cd");
+	}
+}
+void print_working_directory(void)
+{
+	char cwd[1024];
+
+	if (getcwd(cwd, sizeof(cwd)) != NULL)
+	{
+		printf("%s\n", cwd);
+	}
+	else
+	{
+		perror("pwd");
+	}
+}
+int handle_builtin_commands(char *args[])
+{
+	if (strcmp(args[0], "cd") == 0)
+	{
+		change_directory(args[1]);
+		return (1);
+	}
+	else if (strcmp(args[0], "pwd") == 0)
+	{
+		print_working_directory();
+		return (1);
+	}
+	else if (strcmp(args[0], "exit") == 0)
+	{
+		exit(0);
+	}
+	return (0);
+}
+
 
 int main(void)
 {
-	char input[MAX_INPUT_SIZE];
-	char *args[MAX_TOKENS];
+	char command[1024];
+	char *args[10];
 	char *token;
-	int status;
 	int i;
-	pid_t pid;
 
 	while (1)
+	{
+		printf("mysh> ");
+		fgets(command, sizeof(command), stdin);
+		command[strcspn(command, "\n")] = 0;
+		token  = strtok(command, " ");
 
-	{
-		printf("mysh>");
-		if (fgets(input, MAX_INPUT_SIZE, stdin) == NULL)
-		{
-			printf("\n");
-			break;
-		}
-		input[strcspn(input, "\n")] = '\0';
-		if (strcmp(input, "exit") == 0)
-		{
-			break;
-		}
-		printf("You entered: %s\n", input);
-	}
-	i = 0;
+		i = 0;
 
-	token = strtok(input, " ");
-	while (token != NULL)
-	{
-		args[i++] = token;
-		token = strtok(NULL, " ");
-	}
-	args[i] = NULL;
-	pid = fork();
-
-	if (pid == 0)
-	{
-		if (execvp(args[0], args) == -1)
+		while (token != NULL && i < 9)
 		{
-			perror("mysh");
+			args[i] = token;
+			token = strtok(NULL, " ");
+			i++;
 		}
-		exit(EXIT_FAILURE);
-	}
-	else if (pid < 0)
-	{
-		perror("mysh");
-	} else
-	{
-		waitpid(pid, &status, 0);
+		args[i] = NULL;
+		if (args[0] == NULL)
+		{
+			continue;
+		}
+		if (handle_builtin_commands(args) == 0)
+		{
+			printf("Command not found: %s\n", args[0]);
+		}
 	}
 	return (0);
 }
