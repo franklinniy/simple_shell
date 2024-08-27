@@ -5,6 +5,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include "shell.h"
+
 /**
  * @brief Changes the current working directory.
  *
@@ -13,6 +14,8 @@
  *
  * @param path The directory to change to. If NULL, changes to the home
  */
+
+char *find_command_in_path(char *command);
 
 void change_directory(char *path)
 {
@@ -68,7 +71,11 @@ int main(void)
 	while (1)
 	{
 		printf("mysh> ");
-		fgets(command, sizeof(command), stdin);
+		if (fgets(command, sizeof(command), stdin) == NULL)
+		{
+			perror("fgets");
+			continue;
+		}
 		command[strcspn(command, "\n")] = 0;
 		token  = strtok(command, " ");
 
@@ -87,7 +94,30 @@ int main(void)
 		}
 		if (handle_builtin_commands(args) == 0)
 		{
-			printf("Command not found: %s\n", args[0]);
+			char *cmd_path = find_command_in_path(args[0]);
+
+			if (cmd_path != NULL)
+			{
+				pid_t pid = fork();
+				if (pid == 0)
+				{
+					execv(cmd_path, args);
+					perror("execv");
+					exit(EXIT_FAILURE);
+				}
+				else if (pid > 0)
+				{
+					wait(NULL);
+				}
+				else
+				{
+					perror("fork");
+				}
+			}
+			else
+			{
+				printf("Command not found: %s\n", args[0]);
+			}
 		}
 	}
 	return (0);
