@@ -14,6 +14,7 @@
  *
  * @param path The directory to change to. If NULL, changes to the home
  */
+extern char **environ;
 
 char *find_command_in_path(char *command);
 
@@ -41,6 +42,16 @@ void print_working_directory(void)
 		perror("pwd");
 	}
 }
+void print_environment(void)
+{
+    char **env = environ;
+    
+    while (*env)
+    {
+	    printf("%s\n", *env);
+	    env++;
+    }
+}
 int handle_builtin_commands(char *args[])
 {
 	if (strcmp(args[0], "cd") == 0)
@@ -53,6 +64,11 @@ int handle_builtin_commands(char *args[])
 		print_working_directory();
 		return (1);
 	}
+	else if (strcmp(args[0], "env") == 0)
+	{
+		print_environment();
+		return (0);
+	}	
 	else if (strcmp(args[0], "exit") == 0)
 	{
 		exit(0);
