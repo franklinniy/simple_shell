@@ -2,7 +2,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-
+/**
+ * execute_ls - Executes the `ls` command.
+ *
+ * @args: Arguments for the `ls` command.
+ *
+ * Forks a process to execute `/bin/ls` with the given arguments
+ */
 void execute_ls(char *args[])
 {
 	pid_t pid = fork();

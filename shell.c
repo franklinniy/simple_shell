@@ -93,6 +93,8 @@ void execute_command(char *args[])
  * handle_input - Reads and processes user input.
  *
  * This function displays the shell prompt, reads user input
+ *
+ * Return- returns 0
  */
 void handle_input(void)
 {
