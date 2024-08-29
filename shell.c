@@ -6,43 +6,6 @@
 #include <sys/wait.h>
 #include "shell.h"
 /**
- * change_directory - Changes the current working directory.
- * @path: The new path to change to.
- *
- * Return: 0 on success, -1 on failure.
- */
-
-void change_directory(char *path)
-{
-	if (path == NULL)
-	{
-		path = getenv("HOME");
-	}
-	if (chdir(path) != 0)
-	{
-		perror("cd");
-	}
-}
-/**
- * print_working_directory - Changes the current working directory.
- *
- * Return: 0
- */
-
-void print_working_directory(void)
-{
-	char cwd[1024];
-
-	if (getcwd(cwd, sizeof(cwd)) != NULL)
-	{
-		printf("%s\n", cwd);
-	}
-	else
-	{
-		perror("pwd");
-	}
-}
-/**
  * print_environment - Prints all the environment variables.
  *
  * Return: Nothing.
@@ -87,6 +50,13 @@ int handle_builtin_commands(char *args[])
 	}
 	return (0);
 }
+/**
+ * execute_command - Executes a command using execv.
+ *
+ * @args: An array of arguments to pass to execv.
+ *
+ * Forks a new process to execute the command and waits
+ */
 
 void execute_command(char *args[])
 {
@@ -119,6 +89,11 @@ void execute_command(char *args[])
 		printf("Command not found: %s\n", args[0]);
 	}
 }
+/**
+ * handle_input - Reads and processes user input.
+ *
+ * This function displays the shell prompt, reads user input
+ */
 void handle_input(void)
 {
 	char command[1024], *args[10], *token;
