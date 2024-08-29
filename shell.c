@@ -126,7 +126,7 @@ void handle_input(void)
 
 	while (1)
 	{
-		printf("mysh> ");
+		printf("#cisfun$ ");
 		if (fgets(command, sizeof(command), stdin) == NULL)
 		{
 			perror("fgets");
