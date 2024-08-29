@@ -5,7 +5,6 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include "shell.h"
-
 /**
  * change_directory - Changes the current working directory.
  * @path: The new path to change to.
@@ -89,15 +88,40 @@ int handle_builtin_commands(char *args[])
 	return (0);
 }
 
-/**
- * main - Entry point for the simple shell program.
- *
- * Return: Always 0 (Success).
- */
-
-int main(void)
+void execute_command(char *args[])
 {
-	char command[1024], *args[10], *token, *cmd_path;
+	char *cmd_path = find_command_in_path(args[0]);
+	pid_t pid;
+
+	if (cmd_path)
+	{
+		printf("Executing command: %s\n", cmd_path);
+		pid = fork();
+
+		if (pid == 0)
+		{
+			execv(cmd_path, args);
+			perror("execv");
+			exit(EXIT_FAILURE);
+		}
+		else if (pid > 0)
+		{
+			wait(NULL);
+		}
+		else
+		{
+			perror("fork");
+		}
+		free(cmd_path);
+	}
+	else
+	{
+		printf("Command not found: %s\n", args[0]);
+	}
+}
+void handle_input(void)
+{
+	char command[1024], *args[10], *token;
 	int i;
 
 	while (1)
@@ -118,24 +142,18 @@ int main(void)
 		args[i] = NULL;
 		if (args[0] == NULL || handle_builtin_commands(args) != 0)
 			continue;
-		cmd_path = find_command_in_path(args[0]);
-
-		if (cmd_path)
-		{
-			pid_t pid = fork();
-
-			if (pid == 0)
-			{
-				execv(cmd_path, args);
-				perror("execv");
-				exit(EXIT_FAILURE);
-			}
-			else if (pid > 0)
-				wait(NULL);
-		}
-		else
-			printf("Command not found: %s\n", args[0]);
+		execute_command(args);
 	}
-	return (0);
 }
 
+/**
+ * main - Entry point for the simple shell program.
+ *
+ * Return: Always 0 (Success).
+ */
+
+int main(void)
+{
+	handle_input();
+	return (0);
+}
