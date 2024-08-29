@@ -6,7 +6,7 @@
 void execute_ls(char *args[])
 {
 	pid_t pid = fork();
-	
+
 	if (pid == 0)
 	{
 		execv("/bin/ls", args);
