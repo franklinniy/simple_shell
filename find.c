@@ -11,8 +11,6 @@
  *
  * Return: Full path of the command or NULL if not found.
  */
-char *find_command_in_path(const char *command);
-
 char *find_command_in_path(const char *command)
 {
 	char *path_env, *path, full_path[1024], *token;
